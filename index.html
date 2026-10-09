@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocra: handmade ceramics, order by message</title>
+<meta name="description" content="Ocra is a small ceramics studio. Order a piece, book a Saturday class, commission your own shape or ask for the wholesale list, all by message.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23ef7a2e'/%3E%3Ccircle cx='16' cy='16' r='11' fill='%23fde2c4'/%3E%3Cpath d='M16 16V6.5M16 16l6.7-6.7M16 16h9.5M16 16l6.7 6.7M16 16v9.5M16 16l-6.7 6.7M16 16H6.5M16 16 9.3 9.3' stroke='%23ef7a2e' stroke-width='1.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600&display=swap">
+<link rel="preload" as="image" href="img/hero.webp">
+<style>
+/* ---------- Colours and sizes: change these first ---------- */
+:root {
+  --paper: #fbf8f3; --sand: #f2ece4; --sand-2: #e9e1d6; --ink: #1e1a16; --muted: #8b8176; --line: #e6ded3;
+  --orange: #ef7a2e; --orange-soft: #fde2c4;
+  --r: clamp(20px, 2.2vw, 28px); --gut: clamp(16px, 2vw, 22px);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+img, svg { display: block; }
+img { max-width: 100%; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: 12px; top: -60px; z-index: 30; padding: 10px 14px; color: #fff; background: var(--ink); border-radius: 8px; }
+.skip:focus { top: 12px; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* ---------- Forms (shared) ---------- */
+.fgk { --fgk-ink: var(--ink); --fgk-muted: var(--muted); --fgk-line: #e2d9cd; --fgk-field: #fff; --fgk-accent: var(--orange); --fgk-radius: 10px; position: relative; display: grid; gap: 14px; width: 100%; max-width: 360px; font-size: 15px; line-height: 1.4; color: var(--fgk-ink); }
+.fgk-field { display: grid; gap: 6px; font-size: 12px; color: var(--fgk-muted); }
+.fgk :where(input:not([type=checkbox], [type=radio], [type=file], [type=hidden]), select, textarea) { width: 100%; font: inherit; font-size: 15px; color: var(--fgk-ink); background: var(--fgk-field); border: 1px solid var(--fgk-line); border-radius: var(--fgk-radius); padding: 11px 12px; outline: none; box-shadow: 0 1px 2px rgba(60, 40, 20, .05); transition: border-color .2s, box-shadow .2s; }
+.fgk :where(input, select, textarea):focus-visible { border-color: var(--fgk-accent); box-shadow: 0 0 0 4px rgba(239, 122, 46, .16); }
+.fgk :where(input, textarea)::placeholder { color: #b9afa4; }
+.fgk :where(select) { appearance: none; padding-right: 34px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%238b8176' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+.fgk :where(button[type=submit], .fgk-primary) { font: inherit; font-size: 15px; font-weight: 500; color: #fff; background: var(--fgk-ink); border: 0; border-radius: var(--fgk-radius); padding: 12px 16px; cursor: pointer; transition: transform .15s, background .2s, opacity .2s; }
+.fgk :where(button[type=submit], .fgk-primary):hover { background: #3a3129; }
+.fgk :where(.fgk-ghost) { font: inherit; font-size: 15px; color: var(--fgk-ink); background: transparent; border: 1px solid var(--fgk-line); border-radius: var(--fgk-radius); padding: 11px 16px; cursor: pointer; }
+.fgk :where(button):active { transform: scale(.98); }
+.fgk :where(button):disabled { opacity: .6; cursor: progress; }
+.fgk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fgk-sr, .fgk-hp { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.fgk-status { min-height: 1.3em; margin: -4px 0 0; font-size: 13px; color: var(--fgk-muted); }
+.fgk-status.err { color: #c4320a; }
+.fgk-sent { display: none; gap: 10px; justify-items: start; outline: none; }
+.fgk-sent p { margin: 0; }
+.fgk.is-sent > :not(.fgk-sent) { display: none !important; }
+.fgk.is-sent > .fgk-sent { display: grid; animation: fgk-in .4s ease; }
+.fgk-big { font-size: 20px; font-weight: 500; letter-spacing: -.01em; }
+.fgk-small { font-size: 14px; color: var(--fgk-muted); max-width: 270px; }
+@keyframes fgk-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes fgk-slide { from { opacity: 0; transform: translateX(14px); } }
+
+/* Chips and cards that act as radio buttons */
+.fgk fieldset { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.fgk legend { margin: 0 0 8px; padding: 0; font-size: 12px; color: var(--fgk-muted); }
+.fgk-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fgk-chip { position: relative; padding: 8px 13px; background: var(--fgk-field); border: 1px solid var(--fgk-line); border-radius: 999px; font-size: 14px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.fgk-chip input, .fgk-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.fgk-chip:has(input:checked) { color: #fff; background: var(--fgk-accent); border-color: var(--fgk-accent); }
+.fgk-chip:has(input:focus-visible), .fgk-opt:has(input:focus-visible) { box-shadow: 0 0 0 4px rgba(239, 122, 46, .2); }
+.fgk-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.fgk-opt { position: relative; display: grid; justify-items: center; gap: 7px; padding: 16px 6px 12px; background: var(--fgk-field); border: 1px solid var(--fgk-line); border-radius: 12px; font-size: 13px; cursor: pointer; transition: border-color .2s, box-shadow .2s, transform .15s; }
+.fgk-opt svg { width: 22px; height: 22px; }
+.fgk-opt::after { content: ""; position: absolute; top: 7px; right: 7px; width: 10px; height: 10px; border: 1px solid #cdc3b7; border-radius: 50%; transition: background .15s, border-color .15s; }
+.fgk-opt:has(input:checked) { border-color: var(--fgk-accent); box-shadow: 0 0 0 1px var(--fgk-accent); }
+.fgk-opt:has(input:checked)::after { background: var(--fgk-accent); border-color: var(--fgk-accent); box-shadow: inset 0 0 0 2px #fff; }
+.fgk-opt:active { transform: scale(.97); }
+
+/* Order: thank-you card with a drawn tick */
+.fgk-order .fgk-sent { justify-items: center; text-align: center; }
+.fgk-tick { width: 58px; height: 58px; margin-bottom: 6px; }
+.fgk-tick circle, .fgk-tick path { fill: none; stroke: var(--fgk-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fgk-tick circle { stroke-dasharray: 170; stroke-dashoffset: 170; }
+.fgk-tick path { stroke-dasharray: 40; stroke-dashoffset: 40; }
+.is-sent .fgk-tick circle { animation: fgk-draw .7s ease forwards; }
+.is-sent .fgk-tick path { animation: fgk-draw .4s .5s ease forwards; }
+@keyframes fgk-draw { to { stroke-dashoffset: 0; } }
+.fgk-qty { display: flex; align-items: center; justify-content: space-between; padding: 4px; background: var(--fgk-field); border: 1px solid var(--fgk-line); border-radius: var(--fgk-radius); }
+.fgk-qty button { width: 36px; height: 36px; font: inherit; font-size: 18px; background: var(--sand); border: 0; border-radius: 8px; cursor: pointer; }
+.fgk-qty input { width: 60px !important; padding: 6px !important; border: 0 !important; box-shadow: none !important; text-align: center; -moz-appearance: textfield; }
+.fgk-qty input::-webkit-inner-spin-button { appearance: none; }
+
+/* Workshop: steps with a progress bar */
+.fgk-steps .fgk-top { display: grid; gap: 8px; }
+.fgk-bar { height: 4px; overflow: hidden; background: #e8dfd3; border-radius: 4px; }
+.fgk-bar i { display: block; height: 100%; width: calc(var(--fgk-progress, .34) * 100%); background: var(--fgk-accent); transition: width .45s cubic-bezier(.2, .7, .2, 1); }
+.fgk-steplabel { margin: 0; font-size: 12px; color: var(--fgk-muted); }
+.fgk-steps [data-step] { display: grid; gap: 14px; animation: fgk-slide .35s ease; }
+.fgk-steps [data-step][hidden] { display: none; }
+.fgk-nav { display: flex; gap: 8px; }
+.fgk-nav > * { flex: 1; }
+
+/* Commission: files and a growing text area */
+.fgk-zone { position: relative; display: grid; justify-items: center; gap: 6px; padding: 24px 16px; background: var(--fgk-field); border: 1.5px dashed #cdc3b7; border-radius: 14px; font-size: 14px; text-align: center; transition: border-color .2s, background .2s; }
+.fgk-zone svg { width: 26px; height: 26px; color: var(--fgk-accent); transition: transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.fgk-zone small { font-size: 12px; color: var(--fgk-muted); }
+.fgk-zone input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.fgk-zone.is-over, .fgk-zone:focus-within { border-color: var(--fgk-accent); background: #fff8f1; }
+.fgk-zone.is-over svg { transform: translateY(-5px); }
+.fgk-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.fgk-list:empty { display: none; }
+.fgk-list li { overflow: hidden; padding: 7px 10px; background: var(--fgk-field); border: 1px solid var(--fgk-line); border-radius: 8px; white-space: nowrap; text-overflow: ellipsis; animation: fgk-in .3s ease; }
+.fgk textarea[data-autosize] { min-height: 92px; max-height: 260px; resize: none; overflow-y: auto; }
+.fgk-meta { display: flex; justify-content: flex-end; margin-top: -8px; font-size: 12px; color: var(--fgk-muted); }
+
+/* Wholesale: a button that shows sending and done */
+.fgk-loading button[type=submit] { position: relative; display: grid; height: 46px; padding: 0 16px; overflow: hidden; }
+.fgk-loading button[type=submit]:disabled { opacity: 1; }
+.fgk-b { grid-area: 1 / 1; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform .4s cubic-bezier(.2, .7, .2, 1), opacity .3s; }
+.fgk-b2, .fgk-b3 { opacity: 0; transform: translateY(110%); }
+.fgk-loading:is([data-state=sending], [data-state=sent]) .fgk-b1 { opacity: 0; transform: translateY(-110%); }
+.fgk-loading[data-state=sending] .fgk-b2, .fgk-loading[data-state=sent] .fgk-b3 { opacity: 1; transform: none; }
+.fgk-loading button[type=submit]::before { content: ""; position: absolute; inset: 0; background: var(--orange); transform: scaleX(0); transform-origin: left; }
+.fgk-loading[data-state=sending] button[type=submit]::before { animation: fgk-fill 2.4s cubic-bezier(.2, .6, .2, 1) forwards; }
+.fgk-loading[data-state=sent] button[type=submit]::before { transform: scaleX(1); transition: transform .3s; }
+.fgk-dots { display: inline-flex; gap: 3px; }
+.fgk-dots i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: fgk-dot 1s infinite; }
+.fgk-dots i:nth-child(2) { animation-delay: .15s; }
+.fgk-dots i:nth-child(3) { animation-delay: .3s; }
+.fgk-b3 svg { width: 16px; height: 16px; }
+@keyframes fgk-fill { to { transform: scaleX(.92); } }
+@keyframes fgk-dot { 50% { opacity: .25; transform: translateY(-2px); } }
+
+/* Feedback: five faces */
+.fgk-rating legend { margin-bottom: 12px; font-size: 16px; font-weight: 500; color: var(--fgk-ink); }
+.fgk-faces { display: flex; justify-content: space-between; gap: 6px; }
+.fgk-face { position: relative; cursor: pointer; }
+.fgk-face input { position: absolute; opacity: 0; pointer-events: none; }
+.fgk-face svg { width: 52px; height: 52px; padding: 10px; background: var(--fgk-field); border: 1px solid var(--fgk-line); border-radius: 50%; color: #a3988c; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), color .2s, background .2s, border-color .2s; }
+.fgk-face:hover svg { color: var(--fgk-ink); transform: scale(1.06); }
+.fgk-face input:checked + svg { color: #fff; background: var(--fgk-accent); border-color: var(--fgk-accent); transform: scale(1.12); }
+.fgk-face input:focus-visible + svg { box-shadow: 0 0 0 4px rgba(239, 122, 46, .2); }
+.fgk-ends { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--fgk-muted); }
+
+/* Write to us: floating labels on the dark card */
+.fgk-float { --fgk-ink: #fff; gap: 24px; color: #fff; }
+.fgk-fl { position: relative; display: block; }
+.fgk-fl input, .fgk-fl textarea { padding: 22px 0 8px !important; color: #fff !important; background: transparent !important; border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, .28) !important; border-radius: 0 !important; box-shadow: none !important; }
+.fgk-fl textarea { min-height: 84px; resize: none; }
+.fgk-fl span { position: absolute; left: 0; top: 21px; font-size: 15px; color: rgba(255, 255, 255, .55); pointer-events: none; transform-origin: left top; transition: transform .22s cubic-bezier(.2, .7, .2, 1), color .2s; }
+.fgk-fl :is(input, textarea):is(:focus, :not(:placeholder-shown)) + span { transform: translateY(-19px) scale(.78); color: rgba(255, 255, 255, .85); }
+.fgk-fl::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--orange); transform: scaleX(0); transform-origin: left; transition: transform .4s cubic-bezier(.2, .7, .2, 1); }
+.fgk-fl:focus-within::after { transform: scaleX(1); }
+.fgk-float button[type=submit] { color: var(--ink); background: #fff; }
+.fgk-float button[type=submit]:hover { background: var(--orange-soft); }
+.fgk-float .fgk-ghost { color: #fff; border-color: rgba(255, 255, 255, .3); }
+.fgk-float .fgk-status { color: rgba(255, 255, 255, .6); }
+.fgk-float .fgk-status.err { color: #ffb08a; }
+
+/* Newsletter: email and button in one pill, with a consent box */
+.fgk-inline { max-width: 420px; }
+.fgk-pill { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 5px 5px 5px 16px; }
+.fgk-pill input { flex: 1; min-width: 0; border: 0 !important; box-shadow: none !important; padding: 8px 0 !important; background: transparent !important; }
+.fgk-pill button[type=submit] { flex: none; border-radius: 999px; padding: 9px 18px; }
+.fgk-box { display: flex; align-items: flex-start; gap: 10px; width: fit-content; font-size: 13px; cursor: pointer; }
+.fgk-box input { appearance: none; flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin: 0; border: 1px solid rgba(30, 26, 22, .35); border-radius: 5px; background: #fff; cursor: pointer; transition: background .15s, border-color .15s; }
+.fgk-box input::after { content: ""; width: 9px; height: 5px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: translateY(-1px) rotate(-45deg) scale(0); transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); }
+.fgk-box input:checked { background: var(--ink); border-color: var(--ink); }
+.fgk-box input:checked::after { transform: translateY(-1px) rotate(-45deg) scale(1); }
+.fgk-box a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---------- Page ---------- */
+.top { display: grid; gap: 14px; padding: 16px var(--gut) 14px; border-bottom: 1px solid var(--line); }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.logo { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 17px; letter-spacing: -.02em; text-decoration: none; }
+.logo svg { width: 26px; height: 26px; }
+.nav { display: flex; align-items: center; gap: 4px; }
+.nav a { padding: 7px 12px; border-radius: 999px; font-size: 14px; text-decoration: none; transition: background .2s; }
+.nav a:hover { background: var(--sand); }
+.nav .order { margin-left: 6px; color: #fff; background: var(--ink); }
+.nav .order:hover { background: var(--orange); }
+.meta { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; line-height: 1.25; }
+.meta p { margin: 0; }
+.meta span { color: var(--muted); }
+.meta .r { text-align: right; }
+
+.hero { padding: 0 var(--gut); }
+.word { display: flex; align-items: center; margin: .06em 0 .1em; font-family: "Inter Tight", "Inter", sans-serif; font-size: 30vw; font-weight: 600; line-height: .9; letter-spacing: -.035em; white-space: nowrap; }
+.word .ch { display: inline-block; }
+.word .slice { width: .76em; height: .76em; margin: 0 .03em 0 .02em; transform: rotate(var(--turn, 0deg)); }
+.js .word .ch { animation: rise 1s cubic-bezier(.2, .7, .2, 1) both; }
+.js .word .ch:nth-child(2) { animation-delay: .08s; }
+.js .word .ch:nth-child(3) { animation-delay: .16s; }
+.js .word .ch:nth-child(4) { animation-delay: .24s; }
+@keyframes rise { from { opacity: 0; transform: translateY(40%); } }
+.cta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gut); }
+.big { display: grid; place-items: center; height: clamp(80px, 14vw, 118px); overflow: hidden; background: var(--sand); border-radius: var(--r); font-size: clamp(24px, 4.2vw, 44px); letter-spacing: -.035em; text-decoration: none; transition: background .25s, color .25s; }
+.big:hover { background: var(--orange); color: #fff; }
+.roll { display: grid; height: 1.2em; overflow: hidden; line-height: 1.2; }
+.roll span { grid-area: 1 / 1; transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+.roll span + span { transform: translateY(105%); }
+.big:hover .roll span:first-child { transform: translateY(-105%); }
+.big:hover .roll span + span { transform: none; }
+.stage { position: relative; margin: var(--gut) 0 0; overflow: hidden; background: var(--sand); border-radius: var(--r); aspect-ratio: 16 / 9; }
+.stage img { width: 100%; height: 100%; object-fit: cover; transform: translateY(var(--float, 0)) scale(1.08); }
+.stage figcaption { position: absolute; left: 18px; bottom: 16px; padding: 7px 12px; background: rgba(251, 248, 243, .85); backdrop-filter: blur(6px); border-radius: 999px; font-size: 13px; }
+
+.band { overflow: hidden; margin: var(--gut) var(--gut) 0; padding: 18px 0; color: #fff; background: var(--orange); border-radius: var(--r); }
+.band-track { display: flex; width: max-content; animation: band 30s linear infinite; }
+.band-track p { display: flex; gap: 40px; margin: 0; padding-right: 40px; font-size: clamp(18px, 2.2vw, 26px); letter-spacing: -.02em; white-space: nowrap; }
+.band-track p span::before { content: "●"; margin-right: 40px; font-size: .5em; vertical-align: middle; }
+@keyframes band { to { transform: translateX(-50%); } }
+
+.section-head { display: grid; justify-items: center; gap: 10px; padding: clamp(90px, 12vw, 160px) var(--gut) clamp(48px, 6vw, 84px); text-align: center; }
+.section-head h2 { margin: 0; font-family: "Inter Tight", "Inter", sans-serif; font-size: clamp(56px, 9vw, 128px); font-weight: 600; line-height: .92; letter-spacing: -.045em; }
+.section-head p { max-width: 380px; margin: 0; color: var(--muted); }
+
+.shop { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gut); padding: 0 var(--gut); }
+.item { display: grid; gap: 12px; align-content: start; }
+.item figure { position: relative; margin: 0; overflow: hidden; background: var(--sand); border-radius: var(--r); aspect-ratio: 4 / 5; }
+.item img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+.item:hover img { transform: scale(1.05); }
+.price { position: absolute; top: 12px; left: 12px; padding: 5px 11px; color: #fff; background: var(--orange); border-radius: 999px; font-size: 14px; font-weight: 500; }
+.item h3 { margin: 0; font-size: 17px; font-weight: 500; }
+.item p { margin: -8px 0 0; font-size: 15px; color: var(--muted); }
+.item .ask { justify-self: start; padding: 8px 14px; background: var(--sand); border-radius: 999px; font-size: 14px; text-decoration: none; transition: background .2s, color .2s; }
+.item .ask:hover { color: #fff; background: var(--ink); }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gut); margin: clamp(80px, 10vw, 140px) var(--gut) 0; }
+.split .words { display: grid; align-content: space-between; gap: 30px; padding: clamp(28px, 4vw, 56px); background: var(--sand); border-radius: var(--r); }
+.split .words p { margin: 0; font-size: clamp(26px, 3.2vw, 46px); line-height: 1.08; letter-spacing: -.035em; }
+.split .words small { font-size: 15px; color: var(--muted); }
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0; }
+.facts div { padding-top: 12px; border-top: 1px solid rgba(30, 26, 22, .14); }
+.facts dt { font-family: "Inter Tight", "Inter", sans-serif; font-size: clamp(30px, 3.4vw, 48px); font-weight: 600; letter-spacing: -.04em; }
+.facts dd { margin: 0; font-size: 14px; color: var(--muted); }
+.orange-art { position: relative; overflow: hidden; background: var(--orange); border-radius: var(--r); min-height: 420px; }
+.orange-art .slice { position: absolute; filter: drop-shadow(0 22px 30px rgba(120, 40, 0, .32)); transform: rotate(var(--turn, 0deg)); }
+.orange-art .s1 { width: 78%; right: -16%; bottom: -18%; }
+.orange-art .s2 { width: 38%; left: 9%; top: 10%; }
+.orange-art .s3 { width: 16%; left: 46%; top: 40%; }
+
+.rows { display: grid; gap: var(--gut); padding: 0 var(--gut); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gut); align-items: center; }
+.row:nth-child(even) .info { order: 2; }
+.info { display: grid; justify-items: start; padding: 0 clamp(20px, 6vw, 110px); }
+.info .pic { width: min(100%, 300px); margin-bottom: 22px; overflow: hidden; border-radius: 18px; aspect-ratio: 3 / 2; background: var(--sand); }
+.info .pic img { width: 100%; height: 100%; object-fit: cover; }
+.info .num { margin-bottom: 10px; font-size: 13px; color: var(--orange); font-weight: 500; }
+.info h3 { margin: 0 0 6px; font-size: clamp(22px, 2.2vw, 30px); font-weight: 500; letter-spacing: -.025em; }
+.info p { max-width: 360px; margin: 0; font-size: 17px; line-height: 1.4; color: var(--muted); }
+.card { display: grid; place-items: center; min-height: clamp(420px, 38vw, 560px); padding: 48px 24px; background: var(--sand); border-radius: var(--r); }
+.card.dark { background: var(--ink); }
+
+.visit { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--gut); margin: clamp(80px, 10vw, 140px) var(--gut) 0; }
+.visit figure { margin: 0; overflow: hidden; border-radius: var(--r); min-height: 460px; background: var(--sand); }
+.visit figure img { width: 100%; height: 100%; object-fit: cover; }
+.visit .hours { display: grid; align-content: space-between; gap: 28px; padding: clamp(28px, 4vw, 52px); background: var(--sand); border-radius: var(--r); }
+.visit h2 { margin: 0; font-family: "Inter Tight", "Inter", sans-serif; font-size: clamp(40px, 5vw, 72px); font-weight: 600; line-height: .95; letter-spacing: -.045em; }
+.visit dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 24px; margin: 0; font-size: 16px; }
+.visit dt { color: var(--muted); }
+.visit dd { margin: 0; }
+
+.letter { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 28px; margin: clamp(80px, 10vw, 140px) var(--gut) 0; padding: clamp(28px, 4vw, 56px); color: var(--ink); background: var(--orange); border-radius: var(--r); }
+.letter h2 { margin: 0; font-family: "Inter Tight", "Inter", sans-serif; font-size: clamp(40px, 5.4vw, 80px); font-weight: 600; line-height: .95; letter-spacing: -.045em; }
+.letter .fgk { justify-self: end; --fgk-muted: rgba(30, 26, 22, .7); }
+.letter .fgk-status { color: rgba(30, 26, 22, .75); }
+.letter .fgk-sent p { font-size: 18px; font-weight: 500; }
+
+.foot { padding: clamp(70px, 9vw, 120px) var(--gut) var(--gut); }
+.foot .wordmark { display: flex; align-items: center; margin: 0 0 .02em; font-family: "Inter Tight", "Inter", sans-serif; font-size: 30vw; font-weight: 600; line-height: 1; letter-spacing: -.035em; white-space: nowrap; }
+.foot .wordmark .slice { width: .76em; height: .76em; margin: 0 .03em 0 .02em; transform: rotate(var(--turn, 0deg)); }
+.foot .row-end { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+.foot .row-end p { margin: 0; }
+.credit a { color: var(--ink); text-decoration: none; border-bottom: 1px solid currentColor; }
+.credit a:hover { color: var(--orange); }
+
+.float-order { position: fixed; right: 18px; bottom: 18px; z-index: 20; display: flex; align-items: center; gap: 8px; padding: 12px 18px; color: #fff; background: var(--ink); border-radius: 999px; font-size: 15px; text-decoration: none; box-shadow: 0 10px 30px rgba(30, 26, 22, .25); transform: translateY(150%); transition: transform .5s cubic-bezier(.2, .7, .2, 1), background .2s; }
+.float-order.on { transform: none; }
+.float-order:hover { background: var(--orange); }
+.float-order i { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+.float-order:hover i { background: #fff; }
+
+.js .rv { opacity: 0; transform: translateY(46px); transition: opacity .8s ease, transform 1s cubic-bezier(.2, .7, .2, 1); }
+.js .rv.in { opacity: 1; transform: none; }
+
+@media (max-width: 1000px) {
+  .shop { grid-template-columns: repeat(2, 1fr); }
+  .split, .visit, .letter { grid-template-columns: 1fr; }
+  .orange-art, .visit figure { min-height: 0; aspect-ratio: 4 / 3; }
+  .letter .fgk { justify-self: start; }
+}
+@media (max-width: 760px) {
+  .nav a:not(.order) { display: none; }
+  .meta { font-size: 14px; }
+  .row { grid-template-columns: 1fr; }
+  .row .info { order: 0 !important; padding: 26px 4px 2px; }
+  .info p { font-size: 16px; }
+  .card { min-height: 0; padding: 40px 18px; }
+  .shop { gap: 22px 12px; }
+  .item h3 { font-size: 15px; }
+  .item p { font-size: 13px; }
+  .facts { grid-template-columns: 1fr 1fr 1fr; }
+  .fgk-row { grid-template-columns: 1fr; }
+  .float-order { right: 12px; bottom: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .word .ch, .band-track, .fgk, .fgk * { animation: none !important; }
+  .js .rv { opacity: 1; transform: none; transition: none; }
+  .roll span, .item img, .float-order { transition: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#ask">Skip to ordering</a>
+
+<!-- The citrus slice used for the O of the wordmark. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="slice" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="49" fill="#ef7a2e"/>
+    <circle cx="50" cy="50" r="41" fill="#fde2c4"/>
+    <g fill="#f59a52">
+      <path d="M50 50 L50 13 A37 37 0 0 1 76.2 23.8Z"/><path d="M50 50 L76.2 23.8 A37 37 0 0 1 87 50Z"/>
+      <path d="M50 50 L87 50 A37 37 0 0 1 76.2 76.2Z"/><path d="M50 50 L76.2 76.2 A37 37 0 0 1 50 87Z"/>
+      <path d="M50 50 L50 87 A37 37 0 0 1 23.8 76.2Z"/><path d="M50 50 L23.8 76.2 A37 37 0 0 1 13 50Z"/>
+      <path d="M50 50 L13 50 A37 37 0 0 1 23.8 23.8Z"/><path d="M50 50 L23.8 23.8 A37 37 0 0 1 50 13Z"/>
+    </g>
+    <g stroke="#fde2c4" stroke-width="3.2"><path d="M50 10v80M10 50h80M21.7 21.7l56.6 56.6M78.3 21.7 21.7 78.3"/></g>
+    <circle cx="50" cy="50" r="5" fill="#fde2c4"/>
+  </symbol>
+</svg>
+
+<header class="top">
+  <div class="bar">
+    <a class="logo" href="#top"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#slice"/></svg>Ocra</a>
+    <nav class="nav" aria-label="Main">
+      <a href="#shop">Shop</a><a href="#workshop">Workshops</a><a href="#commission">Commissions</a><a href="#visit">Visit</a>
+      <a class="order" href="#order">Order</a>
+    </nav>
+  </div>
+  <div class="meta">
+    <p>Ocra ceramics<br><span>Made by hand on the coast</span></p>
+    <p class="r">New firing<br><span>every month</span></p>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <h1 class="sr">Ocra: handmade ceramics you order by message</h1>
+    <p class="word" aria-hidden="true" data-fit><svg class="slice ch" viewBox="0 0 100 100"><use href="#slice"/></svg><span class="ch">C</span><span class="ch">R</span><span class="ch">A</span></p>
+    <div class="cta">
+      <a class="big" href="#shop"><span class="roll"><span>Shop the kiln</span><span aria-hidden="true">Shop the kiln</span></span></a>
+      <a class="big" href="#workshop"><span class="roll"><span>Book a class</span><span aria-hidden="true">Book a class</span></span></a>
+    </div>
+    <figure class="stage">
+      <img src="img/hero.webp" width="1536" height="1024" alt="Cream ceramic vases with dried grass and an olive branch beside fresh and halved oranges on a white table" data-float>
+      <figcaption>The October firing, ready to ship</figcaption>
+    </figure>
+  </section>
+
+  <div class="band" aria-hidden="true">
+    <div class="band-track">
+      <p><span>New firing every month</span><span>Ships across Europe</span><span>Made by two people</span><span>Saturday classes</span></p>
+      <p><span>New firing every month</span><span>Ships across Europe</span><span>Made by two people</span><span>Saturday classes</span></p>
+    </div>
+  </div>
+
+  <header class="section-head" id="shop">
+    <h2>The kiln</h2>
+    <p>Four pieces from the last firing. Each one is thrown, trimmed and glazed by hand, so no two are quite the same.</p>
+  </header>
+
+  <div class="shop">
+    <article class="item">
+      <figure><img src="img/vase.webp" width="800" height="800" alt="A matte cream vase holding a dried olive branch" loading="lazy"><span class="price">€64</span></figure>
+      <h3>Dune vase</h3><p>Matte cream, 24 cm</p>
+      <a class="ask" href="#order" data-piece="Dune vase">Order this</a>
+    </article>
+    <article class="item">
+      <figure><img src="img/bowl.webp" width="800" height="800" alt="A speckled cream bowl full of oranges with leaves" loading="lazy"><span class="price">€48</span></figure>
+      <h3>Citrus bowl</h3><p>Speckled glaze, 28 cm</p>
+      <a class="ask" href="#order" data-piece="Citrus bowl">Order this</a>
+    </article>
+    <article class="item">
+      <figure><img src="img/pitcher.webp" width="800" height="800" alt="A pitcher in a glossy burnt orange glaze" loading="lazy"><span class="price">€72</span></figure>
+      <h3>Fornace pitcher</h3><p>Burnt orange, 1.2 litres</p>
+      <a class="ask" href="#order" data-piece="Fornace pitcher">Order this</a>
+    </article>
+    <article class="item">
+      <figure><img src="img/cups.webp" width="800" height="800" alt="Three small cups in cream, terracotta and orange" loading="lazy"><span class="price">€54</span></figure>
+      <h3>Trio cups</h3><p>Set of three, 90 ml</p>
+      <a class="ask" href="#order" data-piece="Trio cups">Order this</a>
+    </article>
+  </div>
+
+  <section class="split" aria-label="About the studio">
+    <div class="words">
+      <p>Clay from the hills, glazes mixed in the studio, and a kiln that fires once a month. That is the whole business.</p>
+      <dl class="facts">
+        <div><dt>12</dt><dd>years at the wheel</dd></div>
+        <div><dt>40</dt><dd>pieces a firing</dd></div>
+        <div><dt>2</dt><dd>people, no factory</dd></div>
+      </dl>
+    </div>
+    <div class="orange-art" aria-hidden="true"><svg class="slice s1" viewBox="0 0 100 100"><use href="#slice"/></svg><svg class="slice s2" viewBox="0 0 100 100"><use href="#slice"/></svg><svg class="slice s3" viewBox="0 0 100 100"><use href="#slice"/></svg></div>
+  </section>
+
+  <header class="section-head" id="ask">
+    <h2>Ask us</h2>
+    <p>There is no cart here. Everything works by message, and a person answers within a working day.</p>
+  </header>
+
+  <div class="rows">
+    <!-- Order a piece -->
+    <article class="row" id="order">
+      <div class="info">
+        <div class="num">01 · Order</div>
+        <h3>Order a piece</h3>
+        <p>Pick a piece and how many. We check it is still on the shelf, then send you shipping and a payment link.</p>
+      </div>
+      <div class="card">
+        <!-- Formgong form. Replace fk_your_access_key with the access key from your Formgong dashboard (all forms on this page). -->
+        <form id="f-order" class="fgk fgk-order" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="access_key" value="fk_your_access_key">
+          <input type="hidden" name="request" value="Order">
+          <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <label class="fgk-field">Piece
+            <select name="piece" required data-piece-select>
+              <option value="" disabled selected>Select…</option>
+              <option>Dune vase</option><option>Citrus bowl</option><option>Fornace pitcher</option><option>Trio cups</option>
+            </select>
+          </label>
+          <div class="fgk-field">How many
+            <div class="fgk-qty"><button type="button" data-step-by="-1" aria-label="One less">−</button><input type="number" name="quantity" value="1" min="1" max="6" inputmode="numeric" aria-label="How many"><button type="button" data-step-by="1" aria-label="One more">+</button></div>
+          </div>
+          <div class="fgk-row">
+            <label class="fgk-field">Name<input name="name" autocomplete="name" placeholder="Giulia Neri" required></label>
+            <label class="fgk-field">Email<input type="email" name="email" autocomplete="email" placeholder="giulia@mail.com" required></label>
+          </div>
+          <label class="fgk-field">Ship to (country)<input name="country" autocomplete="country-name" placeholder="Italy" required></label>
+          <button type="submit">Request this order</button>
+          <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+          <div class="fgk-sent" tabindex="-1">
+            <svg class="fgk-tick" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="26"/><path d="m19 31 7.5 7.5L41.5 23"/></svg>
+            <p class="fgk-big">Thank you, <span data-sent-name>there</span>.</p>
+            <p class="fgk-small">We will check the shelf and write back with shipping within a working day.</p>
+            <button type="button" class="fgk-ghost" data-again>Order something else</button>
+          </div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Workshop -->
+    <article class="row" id="workshop">
+      <div class="info">
+        <div class="pic"><img src="img/workshop.webp" width="900" height="600" alt="Hands shaping wet clay on a pottery wheel" loading="lazy"></div>
+        <div class="num">02 · Workshops</div>
+        <h3>Book a Saturday class</h3>
+        <p>Three hours at the wheel, six people at most. You take home two pieces after the next firing.</p>
+      </div>
+      <div class="card">
+        <form id="f-workshop" class="fgk fgk-steps" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="access_key" value="fk_your_access_key">
+          <input type="hidden" name="request" value="Workshop">
+          <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <div class="fgk-top"><div class="fgk-bar"><i></i></div><p class="fgk-steplabel" data-step-label>Step 1 of 3</p></div>
+          <div data-step>
+            <fieldset>
+              <legend>When suits you?</legend>
+              <div class="fgk-chips">
+                <label class="fgk-chip"><input type="radio" name="slot" value="Saturday morning" required>Saturday morning</label>
+                <label class="fgk-chip"><input type="radio" name="slot" value="Saturday afternoon">Saturday afternoon</label>
+                <label class="fgk-chip"><input type="radio" name="slot" value="Private group">Private group</label>
+              </div>
+            </fieldset>
+            <label class="fgk-field">Preferred date<input type="date" name="date" required data-min-today></label>
+            <button type="button" class="fgk-primary" data-next>Next</button>
+          </div>
+          <div data-step>
+            <fieldset>
+              <legend>Have you used a wheel before?</legend>
+              <div class="fgk-opts">
+                <label class="fgk-opt"><input type="radio" name="experience" value="Never" required><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/></svg>Never</label>
+                <label class="fgk-opt"><input type="radio" name="experience" value="A little"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/></svg>A little</label>
+                <label class="fgk-opt"><input type="radio" name="experience" value="Often"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="10.5"/></svg>Often</label>
+              </div>
+            </fieldset>
+            <label class="fgk-field">People
+              <select name="people" required><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+            </label>
+            <div class="fgk-nav"><button type="button" class="fgk-ghost" data-back>Back</button><button type="button" class="fgk-primary" data-next>Next</button></div>
+          </div>
+          <div data-step>
+            <label class="fgk-field">Name<input name="name" autocomplete="name" placeholder="Giulia Neri" required></label>
+            <label class="fgk-field">Email<input type="email" name="email" autocomplete="email" placeholder="giulia@mail.com" required></label>
+            <div class="fgk-nav"><button type="button" class="fgk-ghost" data-back>Back</button><button type="submit">Book</button></div>
+          </div>
+          <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+          <div class="fgk-sent" tabindex="-1"><p class="fgk-big">See you at the wheel, <span data-sent-name>there</span>.</p><p class="fgk-small">We will confirm the date by email. Wear something you do not mind getting muddy.</p><button type="button" class="fgk-ghost" data-again>Book another</button></div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Commission -->
+    <article class="row" id="commission">
+      <div class="info">
+        <div class="num">03 · Commissions</div>
+        <h3>Commission your own shape</h3>
+        <p>A set for a restaurant, a vase to match a room. Send a sketch or a photo and we will tell you what is possible.</p>
+      </div>
+      <div class="card">
+        <form id="f-commission" class="fgk" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="access_key" value="fk_your_access_key">
+          <input type="hidden" name="request" value="Commission">
+          <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <label class="fgk-field">What would you like?<textarea name="message" rows="3" maxlength="800" placeholder="Twelve plates for a small restaurant, in the orange glaze…" required data-autosize></textarea></label>
+          <div class="fgk-meta"><span data-count="message">0 / 800</span></div>
+          <div class="fgk-zone" data-drop data-max="3" data-mb="5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 16V5M7.5 9.5 12 5l4.5 4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke-linecap="round"/></svg>
+            <span>Drop sketches or photos here</span>
+            <small>Up to 3 files, 5 MB each</small>
+            <input type="file" name="reference" multiple accept="image/*,.pdf" aria-label="Attach up to 3 sketches or photos, 5 MB each">
+          </div>
+          <ul class="fgk-list" data-files></ul>
+          <div class="fgk-row">
+            <label class="fgk-field">Name<input name="name" autocomplete="name" placeholder="Giulia Neri" required></label>
+            <label class="fgk-field">Email<input type="email" name="email" autocomplete="email" placeholder="giulia@mail.com" required></label>
+          </div>
+          <button type="submit">Send the idea</button>
+          <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+          <div class="fgk-sent" tabindex="-1"><p class="fgk-big">Got it, <span data-sent-name>there</span>.</p><p class="fgk-small">We will look at the drawings and reply with a price range and a date.</p><button type="button" class="fgk-ghost" data-again>Send another idea</button></div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Wholesale -->
+    <article class="row" id="wholesale">
+      <div class="info">
+        <div class="num">04 · Wholesale</div>
+        <h3>For shops, cafés and hotels</h3>
+        <p>We keep a few pieces back from every firing for places that sell or use them. Ask for the price list.</p>
+      </div>
+      <div class="card">
+        <form id="f-wholesale" class="fgk fgk-loading" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data" data-keep>
+          <input type="hidden" name="access_key" value="fk_your_access_key">
+          <input type="hidden" name="request" value="Wholesale">
+          <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <fieldset>
+            <legend>You are a…</legend>
+            <div class="fgk-opts">
+              <label class="fgk-opt"><input type="radio" name="business" value="Shop" required><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 8h14l-1.2 11.5H6.2z" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Shop</label>
+              <label class="fgk-opt"><input type="radio" name="business" value="Café or restaurant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z" stroke-linejoin="round"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5v2.5M11 3.5v2.5"/></svg>Café</label>
+              <label class="fgk-opt"><input type="radio" name="business" value="Hotel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 19V7M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="11.5" r="2"/></svg>Hotel</label>
+            </div>
+          </fieldset>
+          <label class="fgk-field">Business name<input name="company" autocomplete="organization" placeholder="Bottega Sole" required></label>
+          <label class="fgk-field">Email<input type="email" name="email" autocomplete="email" placeholder="orders@bottegasole.com" required></label>
+          <button type="submit">
+            <span class="fgk-b fgk-b1">Request the price list</span>
+            <span class="fgk-b fgk-b2" aria-hidden="true">Sending <span class="fgk-dots"><i></i><i></i><i></i></span></span>
+            <span class="fgk-b fgk-b3" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>On its way</span>
+          </button>
+          <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </article>
+
+    <!-- Feedback -->
+    <article class="row" id="feedback">
+      <div class="info">
+        <div class="num">05 · After your order</div>
+        <h3>How did it arrive?</h3>
+        <p>Every parcel is packed by hand. Tell us how yours arrived and how you are using it. We read every answer.</p>
+      </div>
+      <div class="card">
+        <form id="f-feedback" class="fgk fgk-rating" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="access_key" value="fk_your_access_key">
+          <input type="hidden" name="request" value="Feedback">
+          <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <fieldset>
+            <legend>How was your order?</legend>
+            <div class="fgk-faces">
+              <label class="fgk-face"><input type="radio" name="rating" value="1" required aria-label="1 of 5, very bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="8.8" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r=".9" fill="currentColor" stroke="none"/><path d="M8 16.5c2.4-2.6 5.6-2.6 8 0"/></svg></label>
+              <label class="fgk-face"><input type="radio" name="rating" value="2" aria-label="2 of 5, bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="8.8" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r=".9" fill="currentColor" stroke="none"/><path d="M8.5 16c2.2-1.3 4.8-1.3 7 0"/></svg></label>
+              <label class="fgk-face"><input type="radio" name="rating" value="3" aria-label="3 of 5, okay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="8.8" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r=".9" fill="currentColor" stroke="none"/><path d="M8.5 15.5h7"/></svg></label>
+              <label class="fgk-face"><input type="radio" name="rating" value="4" aria-label="4 of 5, good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="8.8" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r=".9" fill="currentColor" stroke="none"/><path d="M8.5 14.5c2.2 1.3 4.8 1.3 7 0"/></svg></label>
+              <label class="fgk-face"><input type="radio" name="rating" value="5" aria-label="5 of 5, great"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="8.8" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r=".9" fill="currentColor" stroke="none"/><path d="M7.5 13.5c2.4 3.4 6.6 3.4 9 0"/></svg></label>
+            </div>
+            <div class="fgk-ends"><span>Not good</span><span>Lovely</span></div>
+          </fieldset>
+          <label class="fgk-field">Anything to add? (optional)<textarea name="comment" rows="3" placeholder="It arrived in one piece and…"></textarea></label>
+          <label class="fgk-field">Order email (optional)<input type="email" name="email" autocomplete="email" placeholder="giulia@mail.com"></label>
+          <button type="submit">Send</button>
+          <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+          <div class="fgk-sent" tabindex="-1"><p class="fgk-big">Thank you.</p><p class="fgk-small">It goes straight to the two of us.</p><button type="button" class="fgk-ghost" data-again>Send another</button></div>
+        </form>
+      </div>
+    </article>
+
+    <!-- Write to us -->
+    <article class="row" id="write">
+      <div class="info">
+        <div class="num">06 · Anything else</div>
+        <h3>Write to us</h3>
+        <p>Questions about glazes, care, or a piece you saw at a market. A short note is fine.</p>
+      </div>
+      <div class="card dark">
+        <form id="f-write" class="fgk fgk-float" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="access_key" value="fk_your_access_key">
+          <input type="hidden" name="request" value="Message">
+          <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <label class="fgk-fl"><input name="name" autocomplete="name" placeholder=" " required><span>Name</span></label>
+          <label class="fgk-fl"><input type="email" name="email" autocomplete="email" placeholder=" " required><span>Email</span></label>
+          <label class="fgk-fl"><textarea name="message" rows="2" placeholder=" " required data-autosize></textarea><span>Message</span></label>
+          <button type="submit">Send</button>
+          <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+          <div class="fgk-sent" tabindex="-1"><p class="fgk-big">Thanks, <span data-sent-name>there</span>.</p><p class="fgk-small" style="color:rgba(255,255,255,.6)">We will answer within a working day.</p><button type="button" class="fgk-ghost" data-again>Write again</button></div>
+        </form>
+      </div>
+    </article>
+  </div>
+
+  <section class="visit" id="visit" aria-labelledby="visit-title">
+    <figure><img src="img/studio.webp" width="1536" height="1024" alt="Shelves of cream and terracotta pieces in the studio, with oranges on the worktable" loading="lazy"></figure>
+    <div class="hours">
+      <h2 id="visit-title">Visit the studio</h2>
+      <dl>
+        <dt>Shop</dt><dd>Thursday to Saturday, 10:00–18:00</dd>
+        <dt>Classes</dt><dd>Saturdays, 10:00 and 15:00</dd>
+        <dt>Address</dt><dd>Via dei Vasai 12</dd>
+        <dt>Email</dt><dd>hello@ocra.example</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="letter" aria-labelledby="letter-title">
+    <h2 id="letter-title">One letter<br>per firing.</h2>
+    <form id="f-letter" class="fgk fgk-inline" action="https://formgong.com/submit" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="access_key" value="fk_your_access_key">
+      <input type="hidden" name="request" value="Newsletter">
+      <div class="fgk-hp" aria-hidden="true"><label>Leave this field empty<input name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+      <div class="fgk-pill">
+        <label class="fgk-sr" for="letter-email">Email</label>
+        <input id="letter-email" type="email" name="email" autocomplete="email" placeholder="Your email" required>
+        <button type="submit">Sign up</button>
+      </div>
+      <label class="fgk-box"><input type="checkbox" name="consent" value="yes" required><span>Send me the letter. I can unsubscribe any time.</span></label>
+      <p class="fgk-status" data-status role="status" aria-live="polite"></p>
+      <div class="fgk-sent" tabindex="-1"><p>You are on the list. The next letter comes with the next firing.</p></div>
+    </form>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="wordmark" aria-hidden="true" data-fit><svg class="slice" viewBox="0 0 100 100"><use href="#slice"/></svg>CRA</p>
+  <div class="row-end">
+    <p class="credit">Forms powered by <a href="https://formgong.com" rel="noopener">Formgong</a></p>
+    <p>Ocra is a fictional studio. Prices and pieces are examples.</p>
+    <p>© <span data-year>2026</span> Ocra</p>
+  </div>
+</footer>
+
+<a class="float-order" href="#order" data-float-order><i></i>Order a piece</a>
+
+<script>
+/* Forms: every form on the page sends to Formgong and shows "thank you" only when the answer is success: true. */
+(function () {
+  function setup(form) {
+    var button = form.querySelector('button[type="submit"]');
+    var status = form.querySelector("[data-status]");
+    var steps = Array.prototype.slice.call(form.querySelectorAll("[data-step]"));
+    var at = 0;
+    function say(text, bad) { if (!status) return; status.textContent = text; status.classList.toggle("err", !!bad); }
+    function fields(root) { return Array.prototype.slice.call(root.querySelectorAll("input, select, textarea")).filter(function (f) { return f.type !== "hidden" && f.name !== "botcheck" && f.willValidate; }); }
+
+    var areas = Array.prototype.slice.call(form.querySelectorAll("textarea[data-autosize]"));
+    function fit(area) {
+      area.style.height = "auto";
+      area.style.height = area.scrollHeight + 2 + "px";
+      var counter = form.querySelector('[data-count="' + area.name + '"]');
+      if (counter) counter.textContent = area.value.length + " / " + area.maxLength;
+    }
+    areas.forEach(function (area) { area.addEventListener("input", function () { fit(area); }); fit(area); });
+
+    form.querySelectorAll("[data-min-today]").forEach(function (input) { input.min = new Date().toISOString().slice(0, 10); });
+    form.querySelectorAll("[data-step-by]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var input = b.parentNode.querySelector("input");
+        input.value = Math.min(Number(input.max), Math.max(Number(input.min), (Number(input.value) || 1) + Number(b.dataset.stepBy)));
+      });
+    });
+
+    function show(index) {
+      at = index;
+      steps.forEach(function (step, k) { step.hidden = k !== index; });
+      form.style.setProperty("--fgk-progress", String((index + 1) / steps.length));
+      var label = form.querySelector("[data-step-label]");
+      if (label) label.textContent = "Step " + (index + 1) + " of " + steps.length;
+    }
+    if (steps.length) {
+      show(0);
+      form.addEventListener("click", function (event) {
+        var next = event.target.closest("[data-next]"), back = event.target.closest("[data-back]");
+        if (next && fields(steps[at]).every(function (f) { return f.reportValidity(); })) { show(at + 1); var first = fields(steps[at])[0]; if (first) first.focus(); }
+        if (back) show(at - 1);
+      });
+      form.addEventListener("keydown", function (event) {
+        var next = steps[at].querySelector("[data-next]");
+        if (event.key === "Enter" && next && event.target.tagName !== "TEXTAREA" && event.target.tagName !== "BUTTON") { event.preventDefault(); next.click(); }
+      });
+    }
+
+    var zone = form.querySelector("[data-drop]");
+    var list = form.querySelector("[data-files]");
+    function listFiles(input) {
+      if (!list) return;
+      list.textContent = "";
+      Array.prototype.forEach.call(input.files, function (file) {
+        var item = document.createElement("li");
+        item.textContent = file.name + " · " + (file.size / 1048576).toFixed(1) + " MB";
+        list.appendChild(item);
+      });
+    }
+    if (zone) {
+      var input = zone.querySelector('input[type="file"]');
+      var max = Number(zone.dataset.max || 3), mb = Number(zone.dataset.mb || 5);
+      input.addEventListener("change", function () {
+        var files = Array.prototype.slice.call(input.files);
+        var bad = files.filter(function (f) { return !f.size || f.size > mb * 1048576; })[0];
+        if (files.length > max) { input.value = ""; say("Up to " + max + " files, please.", true); }
+        else if (bad) { input.value = ""; say(bad.name + (bad.size ? " is over " + mb + " MB." : " is empty."), true); }
+        else say("");
+        listFiles(input);
+      });
+      ["dragenter", "dragover"].forEach(function (type) { zone.addEventListener(type, function () { zone.classList.add("is-over"); }); });
+      ["dragleave", "drop"].forEach(function (type) { zone.addEventListener(type, function () { zone.classList.remove("is-over"); }); });
+    }
+
+    function clear() {
+      form.reset();
+      areas.forEach(fit);
+      if (zone) listFiles(zone.querySelector('input[type="file"]'));
+      if (steps.length) show(0);
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      form.dataset.state = "sending";
+      if (button) button.disabled = true;
+      say(form.hasAttribute("data-keep") ? "" : "Sending…");
+      var nameField = form.querySelector('[name="name"]');
+      var firstName = nameField ? nameField.value.trim().split(/\s+/)[0] : "";
+      fetch(form.action, { method: "POST", headers: { Accept: "application/json" }, body: new FormData(form) })
+        .then(function (res) { return res.json().catch(function () { return null; }); })
+        .then(function (result) {
+          if (result && result.success === true) {
+            form.querySelectorAll("[data-sent-name]").forEach(function (node) { node.textContent = firstName || "there"; });
+            form.dataset.state = "sent";
+            say("");
+            clear();
+            if (form.hasAttribute("data-keep")) {
+              say("Sent. The price list is on its way to your inbox.");
+              setTimeout(function () { if (form.dataset.state === "sent") form.dataset.state = "idle"; }, 3200);
+            } else {
+              form.classList.add("is-sent");
+              var sent = form.querySelector(".fgk-sent");
+              if (sent) sent.focus();
+            }
+          } else {
+            form.dataset.state = "error";
+            say((result && result.message) || "Could not send. Please try again.", true);
+          }
+        })
+        .catch(function () {
+          form.dataset.state = "error";
+          say("Could not send. Check your connection and try again.", true);
+        })
+        .then(function () { if (button) button.disabled = false; });
+    });
+
+    form.querySelectorAll("[data-again]").forEach(function (again) {
+      again.addEventListener("click", function () {
+        form.classList.remove("is-sent");
+        form.dataset.state = "idle";
+        var first = fields(form)[0];
+        if (first) first.focus();
+      });
+    });
+  }
+  document.querySelectorAll("form.fgk").forEach(setup);
+})();
+
+/* Page motion: wordmark, reveals, the floating order button. */
+(function () {
+  var root = document.documentElement;
+  var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.classList.add("js");
+  document.querySelectorAll("[data-year]").forEach(function (node) { node.textContent = new Date().getFullYear(); });
+
+  // Both wordmarks fill the width.
+  var marks = document.querySelectorAll("[data-fit]");
+  function fitMarks() {
+    marks.forEach(function (mark) {
+      mark.style.fontSize = "";
+      var range = document.createRange();
+      range.selectNodeContents(mark);
+      var width = range.getBoundingClientRect().width;
+      mark.style.fontSize = Math.floor(parseFloat(getComputedStyle(mark).fontSize) * mark.clientWidth / width * 0.97) + "px";
+    });
+  }
+  fitMarks();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitMarks);
+  window.addEventListener("resize", fitMarks);
+
+  // "Order this" on a piece fills in the order form.
+  var pick = document.querySelector("[data-piece-select]");
+  document.querySelectorAll("[data-piece]").forEach(function (link) {
+    link.addEventListener("click", function () { pick.value = link.dataset.piece; });
+  });
+
+  // Reveal sections as they scroll in.
+  var targets = document.querySelectorAll(".item, .row .info, .row .card, .split > *, .visit > *, .letter");
+  if (!still && "IntersectionObserver" in window) {
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) { entry.target.classList.add("in"); seen.unobserve(entry.target); } });
+    }, { rootMargin: "0px 0px -8% 0px" });
+    targets.forEach(function (el, i) { el.classList.add("rv"); if (el.classList.contains("item")) el.style.transitionDelay = (i % 4) * 0.08 + "s"; seen.observe(el); });
+  }
+
+  // On scroll: the slices turn, the hero photo drifts, the order button shows after the hero.
+  var hero = document.querySelector("[data-float]"), slices = document.querySelectorAll(".slice"), orderButton = document.querySelector("[data-float-order]");
+  var order = document.getElementById("order"), ticking = false;
+  function onScroll() {
+    var y = window.scrollY;
+    if (!still) {
+      slices.forEach(function (slice, i) { slice.style.setProperty("--turn", y * (i % 2 ? -0.09 : 0.12) + "deg"); });
+      if (hero) hero.style.setProperty("--float", Math.min(y, 900) * -0.04 + "px");
+    }
+    var box = order.getBoundingClientRect();
+    orderButton.classList.toggle("on", y > window.innerHeight * 0.9 && (box.bottom < 0 || box.top > window.innerHeight));
+    ticking = false;
+  }
+  window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>
