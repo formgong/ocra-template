@@ -46,6 +46,8 @@ A form shows its thank-you state only when Formgong answers `success: true`. If 
 
 **Images.** The seven photos were generated for this template with ChatGPT image generation (OpenAI) and saved as WebP, about 400 KB in all. You may use them in your own site. Replace them with photos of your own work, keeping the file names. The citrus slices are drawn in SVG.
 
+The "Powered by Formgong" links point to `https://formgong.com/review-page/fk_your_access_key`, so the same find and replace covers them. Once your key is in, the first click from your published site makes your own public review page on Formgong, where clients read and leave reviews, and every later click opens it. Switch the page off in Formgong (Reviews → your site → Settings) or change those links.
+
 ## Українська
 
 Односторінковий шаблон для майстерні, яка продає через повідомлення, а не через кошик: кераміка, свічки, хліб, квіти. Студія Ocra, її вироби й ціни вигадані.
@@ -74,3 +76,5 @@ A form shows its thank-you state only when Formgong answers `success: true`. If 
 **Зображення:** сім фото згенеровано для цього шаблону в ChatGPT (OpenAI) і збережено у WebP, разом близько 400 КБ. Їх можна використовувати на своєму сайті. Часточки апельсина намальовано в SVG.
 
 MIT license.
+
+Посилання «Powered by Formgong» ведуть на `https://formgong.com/review-page/fk_your_access_key`, тож та сама заміна ключа оновить і їх. Коли ключ стоїть, перший перехід з вашого опублікованого сайту створює вашу публічну сторінку відгуків на Formgong, де клієнти читають і залишають відгуки; далі посилання відкриває її. Вимкнути сторінку можна у Formgong (Відгуки → ваш сайт → Налаштування) або змінити ці посилання.
